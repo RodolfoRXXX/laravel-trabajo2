@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Categoria;
+use App\Models\Producto;
 use Illuminate\Http\Request;
 
 class CategoriaController extends Controller
@@ -85,7 +86,9 @@ class CategoriaController extends Controller
      */
     public function edit($id)
     {
-        //
+        $Categoria = Categoria::find($id);
+
+        return view('/categoriaEdit', [ 'Categoria'=>$Categoria ]);
     }
 
     /**
@@ -95,9 +98,37 @@ class CategoriaController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request )
     {
-        //
+        $catNombre = $request->catNombre;
+        $this->validarForm( $request );
+        $Categoria = Categoria::find($request->idCategoria);
+        $Categoria->catNombre = $catNombre;
+        $Categoria->save();
+        return redirect('/categorias')
+               ->with([ 'mensaje'=>'La categoría '.$catNombre.' ha sido modificada correctamente' ]);
+    }
+
+        private function productoPorCategoria($id)
+        {
+            $check = Producto::firstWhere('idCategoria', $id);
+            return $check;
+        }
+
+
+    public function confirm($id)
+    {
+        $Categoria = Categoria::find($id);
+        if(!$this->productoPorCategoria($id))
+        {
+            return view('/categoriaDelete', [ 'Categoria'=>$Categoria ]);
+        }
+        return redirect('/categorias')
+               ->with(
+                   [
+                    'warning'=>'warning',
+                    'mensaje'=>'La categoría '.$Categoria->catNombre.' no puede eliminarse por tener productos relacionados'    
+                   ]);
     }
 
     /**
@@ -106,8 +137,10 @@ class CategoriaController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy( Request $request )
     {
-        //
+        Categoria::destroy($request->idCategoria);
+        return redirect('/categorias')
+               ->with(['mensaje'=>'La categoría '.$request->catNombre.' ha sido eliminada']);
     }
 }
