@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Categoria;
+use App\Models\Marca;
 use App\Models\Producto;
 use Illuminate\Http\Request;
 
@@ -14,7 +16,8 @@ class ProductoController extends Controller
      */
     public function index()
     {
-        //
+        $productos = Producto::with([ 'getMarca', 'getCategoria' ])->paginate(6);
+        return view('productos', ['productos'=>$productos]);
     }
 
     /**
@@ -24,8 +27,16 @@ class ProductoController extends Controller
      */
     public function create()
     {
-        //
+        $marcas = Marca::all();
+        $categorias = Categoria::all();
+            return view('productoCreate',
+                [
+                    'marcas'=>$marcas,
+                    'categorias'=>$categorias
+                ]
+            );
     }
+
 
     /**
      * Store a newly created resource in storage.
@@ -35,7 +46,15 @@ class ProductoController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        //validamos
+
+        //subir imagen
+
+        //instanciamos
+
+        //asignamos atributos
+
+        //guardamos
     }
 
     /**

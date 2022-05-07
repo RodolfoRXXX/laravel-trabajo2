@@ -28,3 +28,8 @@ Route::get('/categoria/delete/{id}', [ CategoriaController::class, 'confirm' ]);
 Route::delete('/categoria/destroy', [ CategoriaController::class, 'destroy' ]);
 
 ########  crud de productos  #######
+use App\Http\Controllers\ProductoController;
+
+Route::get('/productos', [ ProductoController::class, 'index' ]);
+Route::get('/producto/create', [ ProductoController::class, 'create' ]);
+Route::post('/producto/store', [ ProductoController::class, 'store' ]);
