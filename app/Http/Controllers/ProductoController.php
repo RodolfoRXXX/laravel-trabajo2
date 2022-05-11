@@ -37,6 +37,53 @@ class ProductoController extends Controller
             );
     }
 
+        private function validarForm( Request $request )
+        {
+            $request->validate(
+                          [
+                            'prdNombre'     =>'required|min:2|max:75',
+                            'prdPrecio'     =>'required|numeric|min:0',
+                            'idMarca'       =>'required|int',
+                            'idCategoria'   =>'required|int',
+                            'prdDescripcion'=>'required|min:2|max:150',
+                            'prdImagen'     =>'image|max:2048'
+                            //'prdImagen'   =>'mimes:jpg,jpeg,png|max:2048' (con "mimes" definimos los tipos exactos que se aceptan mientras que "image" acepta ciertos formatos por defecto)
+                          ],
+                          [
+                            'prdNombre.required'     =>'El campo "Nombre del producto" es obligatorio.',
+                            'prdNombre.min'          =>'El campo "Nombre del producto" debe tener como mínimo 2 caractéres.',
+                            'prdNombre.max'          =>'El campo "Nombre" debe tener 75 caractéres como máximo.',
+                            'prdPrecio.required'     =>'Complete el campo Precio.',
+                            'prdPrecio.numeric'      =>'Complete el campo Precio con un número.',
+                            'prdPrecio.min'          =>'Complete el campo Precio con un número mayor a 0.',
+                            'idMarca.required'       =>'Seleccione una marca.',
+                            'idMarca.integer'        =>'Seleccione una marca.',
+                            'idCategoria.required'   =>'Seleccione una categoría.',
+                            'idCategoria.integer'    =>'Seleccione una categoría.',
+                            'prdDescripcion.required'=>'Complete el campo Descripción.',
+                            'prdDescripcion.min'     =>'Complete el campo Descripción con al menos 3 caractéres',
+                            'prdDescripcion.max'     =>'Complete el campo Descripción con 150 caractéres como máximo.',
+                            'prdImagen.mimes'        =>'Debe ser una imagen.',
+                            'prdImagen.max'          =>'Debe ser una imagen de 2MB como máximo.'
+                          ]
+            );
+        }
+        private function subirImagen( Request $request)
+        {
+            //valoriza la variable con la imagen por defecto
+            $prdImagen = 'noDisponible.png';
+            //verifica que el campo tenga un archivo
+            if($request->file('prdImagen')){
+                //recupera la extensión del archivo subido
+                $extension = $request->file('prdImagen')->extension();
+                //renombra el archivo= cantSegundos.extensión
+                $prdImagen = time().'.'.$extension;
+                //mover el archivo a la carpeta donde se va a guardar
+                $request->file('prdImagen')->move(public_path('/imagenes/productos/'),$prdImagen);
+            }
+
+            return $prdImagen;
+        }
 
     /**
      * Store a newly created resource in storage.
@@ -47,14 +94,24 @@ class ProductoController extends Controller
     public function store(Request $request)
     {
         //validamos
-
+        $this->validarForm( $request );
         //subir imagen
-
+        $prdImagen = $this->subirImagen( $request );
         //instanciamos
-
+        $Producto = new Producto;
         //asignamos atributos
-
+        $Producto->prdNombre      = $request->prdNombre;
+        $Producto->prdPrecio      = $request->prdPrecio;
+        $Producto->idMarca        = $request->idMarca;
+        $Producto->idCategoria    = $request->idCategoria;
+        $Producto->prdDescripcion = $request->prdDescripcion;
+        $Producto->prdImagen      = $prdImagen;
+        $Producto->prdActivo      = 1;
         //guardamos
+        $Producto->save();
+        //flasheamos
+        return redirect('/productos')
+               ->with(['mensaje'=>'El producto: '.$request->prdNombre.' ha sido agregado correctamente']);
     }
 
     /**
